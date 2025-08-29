@@ -14,8 +14,10 @@
 ### Entity
 **User** 
 - id, email, jelszó, illetve egy OneToMany kapcsolat Registrationjeivel
+  
 **Event**
 - id, cím, kapacitás, egy dátum, ehhez tartozó Registration-ökkel OneToMany kapcsolat
+  
 **Registration**
 - id, Event és User ManyToOne kapcsolatokkal, qPosition - tehát a várolistában lévő pozíció (null, ha sikeresen regisztrált)
 
