@@ -5,12 +5,15 @@
  - PHP: 8.4.11
  - Adatbázis: SQLite
  - Auth: JWT token (lexik/jwt-authentication-bundle)
+ - API testeléshez Postman
 ## Rövid leírás
  - Felhasználó tud regisztrálni, bejelentkezni, majd ezek után tud az eseményekre regisztrálni. Ha van még hely, akkor sikeres üzenet a válasz, ha nincs, akkor a válaszban benne van a sorszáma.
    
  - Ezen felül az admin felhasználó tud létrehozni, törölni, szerkeszteni eseményeket, felhasználókat fel- és lejelentkeztetni eseményekről.
    
  - Csakis REST endpointokat tartalmaz a projekt, semmi féle frontend megvalósítással / twig.html-el. Minden endpoint szigorúan JSON-nel és egy HTTP kóddal válaszol, és JWT token szükséges az endpointok (kivéve /login, /register) eléréséhez.
+
+ - Adat validáció Validatorrel, kivéve egyszerű "id" paraméterek esetén.
 
 ## Adatok struktúrája
 ### Entity
@@ -51,7 +54,7 @@
 ## Teszt adatok
 - Generálás: Doctrine Fixtures és Faker, minden felhasználó jelszava `test123asd`.
   
-- Külön létrehozott admin felhasználó tesztelésre: `admin@admin.com` , `admintest123`.
+- Külön létrehozott admin felhasználó tesztelésre: `admin@admin.com` , `admin123asd`.
 
 ## Futtatás
 **Követelmények**
