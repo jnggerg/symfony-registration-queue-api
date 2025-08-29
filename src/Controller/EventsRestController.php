@@ -106,8 +106,12 @@ final class EventsRestController extends AbstractController
 
     //register to an event
     #[Route('/events/register/{event_id}', name: 'app_events_register', methods: ['POST'])]
-    public function register(int $event_id): JsonResponse
+    public function register(string $event_id): JsonResponse
     {
+        if (!ctype_digit($event_id)) {
+            return new JsonResponse(['status' => 'error', 'message' => 'Invalid event ID'], 400);
+        }
+        $event_id = (int) $event_id;
         $event = $this->eventRepository->find($event_id);
         if (!$event) {
             return new JsonResponse(['status' => 'error', 'message' => 'Event not found'], 404);
