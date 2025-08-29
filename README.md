@@ -5,7 +5,6 @@
  - PHP: 8.4.11
  - Adatbázis: SQLite
  - Auth: JWT token (lexik/jwt-authentication-bundle)
-Az adatbázishoz SQLiteot használtam, teszteléshez az adokat Doctrine Fixture-ökben generáltam, helyenként Fakerrel (mindegyik felhasználó jelszava "test123asd"). Külön admin felhasználó az admin-only endpointokhoz: admin@admin.com|admintest123
 ## Rövid leírás
  - Felhasználó tud regisztrálni, bejelentkezni, majd ezek után tud az eseményekre regisztrálni. Ha van még hely, akkor sikeres üzenet a válasz, ha nincs, akkor a válaszban benne van a sorszáma.
  - Ezen felül az admin felhasználó tud létrehozni, törölni, szerkeszteni eseményeket, felhasználókat fel- és lejelentkeztetni eseményekről.
