@@ -7,14 +7,20 @@
         "php": ">=8.2",
         "ext-ctype": "*",
         "ext-iconv": "*",
-        "symfony/console": "7.3.*",
-        "symfony/dotenv": "7.3.*",
+        "doctrine/dbal": "^3",
+        "doctrine/doctrine-bundle": "^2.15",
+        "doctrine/doctrine-migrations-bundle": "^3.4",
+        "doctrine/orm": "^3.5",
+        "lexik/jwt-authentication-bundle": "^3.1",
+        "symfony/console": "^7.3",
+        "symfony/dotenv": "^7.3",
         "symfony/flex": "^2",
-        "symfony/framework-bundle": "7.3.*",
-        "symfony/runtime": "7.3.*",
-        "symfony/yaml": "7.3.*"
-    },
-    "require-dev": {
+        "symfony/framework-bundle": "^7.3",
+        "symfony/runtime": "^7.3",
+        "symfony/security-bundle": "^7.3",
+        "symfony/serializer": "^7.3",
+        "symfony/validator": "^7.3",
+        "symfony/yaml": "^7.3"
     },
     "config": {
         "allow-plugins": {
@@ -47,14 +53,12 @@
     },
     "scripts": {
         "auto-scripts": {
-            "cache:clear": "symfony-cmd",
-            "assets:install %PUBLIC_DIR%": "symfony-cmd"
         },
         "post-install-cmd": [
-            "@auto-scripts"
+
         ],
         "post-update-cmd": [
-            "@auto-scripts"
+
         ]
     },
     "conflict": {
@@ -63,7 +67,13 @@
     "extra": {
         "symfony": {
             "allow-contrib": false,
-            "require": "7.3.*"
+            "require": "^7.3",
+            "docker": false
         }
+    },
+    "require-dev": {
+        "doctrine/doctrine-fixtures-bundle": "^4.1",
+        "fakerphp/faker": "^1.24",
+        "symfony/maker-bundle": "^1.64"
     }
 }
