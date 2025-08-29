@@ -71,6 +71,8 @@
 
 -openssl pkey -in config/jwt/private.pem -out config/jwt/public.pem -pubout
 
+- A kért passphrase a .env-ben található
+
 **Adatbázis**
 - php bin/console doctrine:database:create
   
