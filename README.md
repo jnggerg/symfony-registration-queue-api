@@ -55,12 +55,13 @@
 
 ## Futtatás
 **Követelmények**
-- PHP, Composer, openssl (JWT token generálásához)
+- PHP, Composer, openssl (JWT token generálásához), Symfony CLI
   
 **Dependency-k letöltése**
 - composer install
   
 **JWT kulcs generálása**
+
 -mkdir config/jwt
 
 -openssl genpkey -out config/jwt/private.pem -aes256 -algorithm rsa -pkeyopt rsa_keygen_bits:4096
@@ -73,4 +74,7 @@
 - php bin/console doctrine:migrations:migrate
   
 - php bin/console doctrine:fixtures:load
+
+**Szerver indítása**
+- Symfony server:start
 
