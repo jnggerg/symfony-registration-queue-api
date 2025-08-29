@@ -1,35 +1,83 @@
 # Symfony Event-Registration queue system API
 
-## A projekt Symfony 7.3.2-ben (PHP 8.4.11) készült.
-Az adatbázishoz SQLiteot használtam, teszteléshez az adokat Doctrine Fixture-ökben generáltam, helyenként Fakerrel (mindegyik felhasználó jelszava "test123asd"). Külön admin felhasználó az admin-only endpointokhoz: admin@admin.com|admintest123
+## Környezet 
+ - Symfony: 7.3.2
+ - PHP: 8.4.11
+ - Adatbázis: SQLite
+ - Auth: JWT token (lexik/jwt-authentication-bundle)
+ - API testeléshez Postman
+## Rövid leírás
+ - Felhasználó tud regisztrálni, bejelentkezni, majd ezek után tud az eseményekre regisztrálni. Ha van még hely, akkor sikeres üzenet a válasz, ha nincs, akkor a válaszban benne van a sorszáma.
+   
+ - Ezen felül az admin felhasználó tud létrehozni, törölni, szerkeszteni eseményeket, felhasználókat fel- és lejelentkeztetni eseményekről.
+   
+ - Csakis REST endpointokat tartalmaz a projekt, semmi féle frontend megvalósítással / twig.html-el. Minden endpoint szigorúan JSON-nel és egy HTTP kóddal válaszol, és JWT token szükséges az endpointok (kivéve /login, /register) eléréséhez.
 
-Szinte minden osztályt automatikusan hoztam létre maker-bundle-vel (user,entity,security,migration,fixture,controller).
-A projekt összes endpointja REST endpoint, szigorúan json-nel válaszol, HTTP kódokkal, minden requesthez kell Bearer token auth.
-Az authorizáció JWT tokennel történik, a config\packages\security.yaml-ben configurált firewall alapján, a lexik/jwt-authentication-bundle használatával.
+ - Adat validáció Validatorrel, kivéve egyszerű "id" paraméterek esetén.
 
-A projekt alapvető felépítése:
-    - 3 Entity:
-        - User (id, jelszó / email, illetve egy OneToMany kapcsolat Registration-ökkel)
-        - Event (id, Cím, kapacitás, egy dátum, ehhez tartozó Registration-ökkel OneToMany kapcsolat)
-        - Registration (id, Event, User ManyToOne kapcsolatokkal, qPosition, tehát a várolistában lévő pozíció)
-    - Minden várolistával kapcsolatos logikát a src\Service\QueueHandlerService kezeli.
-    - A felhasználónak elérhető Route-ok az EventsRestController-ben vannak implementálva.
-    - Admin endpointok (create,delete,edit Event, stb.) az EventsAdminController-ben.
-    - A security.yaml kezeli a tűzfalat, az összes endpoint csak bejelentkezett felhasználóknak érhető el, különben 403 error-ral válaszol.
-    - A src\Repository\RegistrationRepository osztályban vannak definiálva az SQL query segédmetódusok, amik a QueueHandlerService-ben vannak alkalmazva, leginkább az olvashatóság kedvéért.
+## Adatok struktúrája
+### Entity
+**User** 
+- id, email, jelszó, illetve egy OneToMany kapcsolat Registrationjeivel
+  
+**Event**
+- id, cím, kapacitás, egy dátum, ehhez tartozó Registration-ökkel OneToMany kapcsolat
+  
+**Registration**
+- id, Event és User ManyToOne kapcsolatokkal, qPosition - tehát a várolistában lévő pozíció (null, ha sikeresen regisztrált)
 
-Összes használt package listája:
-composer require doctrine
-composer require doctrine/doctrine-migrations-bundle
-composer require --dev doctrine/doctrine-fixtures-bundle
-composer require --dev maker-bundle
-composer require --dev fakerphp/faker
-composer require security
-composer require validator
-composer remove symfony/twig-bundle
-composer require symfony/serializer
-composer require lexik/jwt-authentication-bundle
+### Service
+**QueueHandlerService**
+- Minden várolistával kapcsolatos logikát ez kezeli, hozzáadást, törlést, illetve törlés esetén a sorszámok eltolását.
+  
+### Repository
+**RegistrationRepository**
+- Ez tartalmazza a QueueHandler által használ segédmetódus SQL query-ket, leginkább az olvashatóság kedvéért.
+  
+**UsersRepository** és **EventRepository** érintetlen, ezek segítenek az adatbázisból való lekérdezésekbe.
 
-A JWT tokenhez konfigurációhoz openssl-t használtam:
-openssl genrsa -out config/jwt/private.pem -aes256 4096
-openssl rsa -pubout -in config/jwt/private.pem -out config/jwt/public.pem
+### Controller
+**EventsRestController**
+- Ebben vannak a normális felhasználóknak elérhető Rest endpointok, mint az események lekérdezése, jelentkezés / lejelentkezés.
+  
+**EventsAdminController**
+- Az admin jogokkal rendlkező felhasználóknal elérhető CRUD endpointok, illetve szolgál más felhasználók le és feljelentkeztetésére egy adott eseményre is.
+  
+**RegisterController**
+- A regisztráláshoz szükséges /register endpointért felelős kontroller.
+  
+### Auth
+- JWT token alapú autentikáció, security.yaml fileban implementált json_loginnal.
+  
+- Firewall az endpointok védéséhez, kivétel a /login és /register.
+
+## Teszt adatok
+- Generálás: Doctrine Fixtures és Faker, minden felhasználó jelszava `test123asd`.
+  
+- Külön létrehozott admin felhasználó tesztelésre: `admin@admin.com` , `admin123asd`.
+
+## Futtatás
+**Követelmények**
+- PHP, Composer, openssl (JWT token generálásához), Symfony CLI
+  
+**Dependency-k letöltése**
+- composer install
+  
+**JWT kulcs generálása**
+
+-mkdir config/jwt
+
+-openssl genpkey -out config/jwt/private.pem -aes256 -algorithm rsa -pkeyopt rsa_keygen_bits:4096
+
+-openssl pkey -in config/jwt/private.pem -out config/jwt/public.pem -pubout
+
+**Adatbázis**
+- php bin/console doctrine:database:create
+  
+- php bin/console doctrine:migrations:migrate
+  
+- php bin/console doctrine:fixtures:load
+
+**Szerver indítása**
+- Symfony server:start
+
