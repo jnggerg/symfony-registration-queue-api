@@ -24,15 +24,20 @@
 ### Service
 **QueueHandlerService**
 - Minden várolistával kapcsolatos logikát ez kezeli, hozzáadást, törlést, illetve törlés esetén a sorszámok eltolását.
+  
 ### Repository
 **RegistrationRepository**
 - Ez tartalmazza a QueueHandler által használ segédmetódus SQL query-ket, leginkább az olvashatóság kedvéért.
+  
 **UsersRepository** és **EventRepository** érintetlen, ezek segítenek az adatbázisból való lekérdezésekbe.
+
 ### Controller
 **EventsRestController**
 - Ebben vannak a normális felhasználóknak elérhető Rest endpointok, mint az események lekérdezése, jelentkezés / lejelentkezés.
+  
 **EventsAdminController**
 - Az admin jogokkal rendlkező felhasználóknal elérhető CRUD endpointok, illetve szolgál más felhasználók le és feljelentkeztetésére egy adott eseményre is.
+  
 **RegisterController**
 - A regisztráláshoz szükséges /register endpointért felelős kontroller.
 ### Auth
@@ -46,12 +51,15 @@
 ## Futtatás
 **Követelmények**
 - PHP, Composer, openssl (JWT token generálásához)
+  
 **Dependency-k letöltése**
 - composer install
+  
 **JWT kulcs generálása**
 -mkdir config/jwt
 -openssl genpkey -out config/jwt/private.pem -aes256 -algorithm rsa -pkeyopt rsa_keygen_bits:4096
 -openssl pkey -in config/jwt/private.pem -out config/jwt/public.pem -pubout
+
 **Adatbázis**
 - php bin/console doctrine:database:create
 - php bin/console doctrine:migrations:migrate
