@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use DateTime;
-use Symfony\Component\Validator\Constraints;
+use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\DBAL\Types\Types;
 use Symfony\Component\Serializer\Annotation\Groups;
 
@@ -22,15 +22,21 @@ class Event
 
     #[Groups(['event:get'])]
     #[ORM\Column(type: Types::TEXT, length: 150)]
+    #[Assert\Length(min: 3, max: 150)]
+    #[Assert\NotBlank]
     private ?string $title = null;
 
     #[ORM\Column]
-    #[Constraints\Positive]
+    #[Assert\Positive]
+    #[Assert\NotBlank]
     #[Groups(['event:get'])]
     private ?int $capacity = 0;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Groups(['event:get'])]
+    //#[Assert\DateTime] not needed since it only checks if given string can be converted to a datetime
+    #[Assert\GreaterThan('now')]
+    #[Assert\NotBlank]
     private DateTime $date;
 
     #[ORM\OneToMany(targetEntity: Registration::class, mappedBy: 'event', orphanRemoval: true)] //using mapped by since relation is bidirectional

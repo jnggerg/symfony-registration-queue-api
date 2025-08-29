@@ -10,18 +10,21 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class RegisterController extends AbstractController
 {
     private UserRepository $userRepository;
     private EntityManagerInterface $entityManager;
     private UserPasswordHasherInterface $passwordHasher;
+    private ValidatorInterface $validator;
 
-    public function __construct(UserRepository $userRepository, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher)
+    public function __construct(UserRepository $userRepository, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, ValidatorInterface $validator)
     {
         $this->userRepository = $userRepository;
         $this->entityManager = $entityManager;
         $this->passwordHasher = $passwordHasher;
+        $this->validator = $validator;
     }
 
     //expects an email-password combination
@@ -31,18 +34,15 @@ final class RegisterController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         if (isset($data['email']) && isset($data['password'])) {
-            if(!is_string($data['email']) || !is_string($data['password'])) {
-                return new JsonResponse(['status' => 'error', 'message' => 'Invalid email or password'], 400);
-            }
-            if (strlen($data['password']) < 6) {
-                return new JsonResponse(['status' => 'error', 'message' => 'Password must be at least 6 characters'], 400);
-            }
-            
-            if ($this->userRepository->findOneBy(['email' => $data['email']])) {
-                return new JsonResponse(['status' => 'error', 'message' => 'Email already registered'], 400);
-            }
             $user = new User();
             $user->setEmail($data['email']);
+            $user->setPlainPassword($data['password']);
+
+            $errors = $this->validator->validate($user);
+            if (count($errors) > 0) {
+                $errors = array_map(fn($e) => $e->getMessage(), iterator_to_array($errors));
+                return new JsonResponse(['status' => 'error', 'message' => 'Invalid data given', 'errors' => $errors], 400);
+            }
             $user->setPassword($this->passwordHasher->hashPassword($user, $data['password']));
 
             $this->entityManager->persist($user);
