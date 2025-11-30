@@ -1,69 +1,72 @@
-# Symfony Event-Registration queue system API
+## Environment
+ - Symfony: 7.3.2  
+ - PHP: 8.4.11  
+ - Database: SQLite  
+ - Auth: JWT token (lexik/jwt-authentication-bundle)  
+ - Postman for API testing  
 
-## Környezet 
- - Symfony: 7.3.2
- - PHP: 8.4.11
- - Adatbázis: SQLite
- - Auth: JWT token (lexik/jwt-authentication-bundle)
- - API testeléshez Postman
-## Rövid leírás
- - Felhasználó tud regisztrálni, bejelentkezni, majd ezek után tud az eseményekre regisztrálni. Ha van még hely, akkor sikeres üzenet a válasz, ha nincs, akkor a válaszban benne van a sorszáma.
+## Short Description
+ - A user can register, log in, and afterwards register for events.  
+   If there is still available capacity, the response returns a success message.  
+   If the event is full, the response contains the user's queue position.
    
- - Ezen felül az admin felhasználó tud létrehozni, törölni, szerkeszteni eseményeket, felhasználókat fel- és lejelentkeztetni eseményekről.
+ - Additionally, an admin user can create, delete, and edit events, as well as sign users up or remove them from events.
    
- - Csakis REST endpointokat tartalmaz a projekt, semmi féle frontend megvalósítással / twig.html-el. Minden endpoint szigorúan JSON-nel és egy HTTP kóddal válaszol, és JWT token szükséges az endpointok (kivéve /login, /register) eléréséhez.
+ - The project only contains REST endpoints, without any kind of frontend implementation or twig.html templates.  
+   Every endpoint responds strictly with JSON and an HTTP status code, and JWT authentication is required for all endpoints (except `/login` and `/register`).
 
- - Adat validáció Validatorrel, kivéve egyszerű "id" paraméterek esetén.
+ - Data validation is handled with the Validator component, except for simple “id” parameters.
 
-## Adatok struktúrája
+## Data Structure
+
 ### Entity
-**User** 
-- id, email, jelszó, illetve egy OneToMany kapcsolat Registrationjeivel
-  
-**Event**
-- id, cím, kapacitás, egy dátum, ehhez tartozó Registration-ökkel OneToMany kapcsolat
-  
-**Registration**
-- id, Event és User ManyToOne kapcsolatokkal, qPosition - tehát a várolistában lévő pozíció (null, ha sikeresen regisztrált)
+**User**  
+- id, email, password, and a OneToMany relationship with its Registrations
+
+**Event**  
+- id, title, capacity, a date, and a OneToMany relationship with its Registrations
+
+**Registration**  
+- id, ManyToOne relationships with Event and User, qPosition – meaning the position in the queue (null if the registration was successful)
 
 ### Service
-**QueueHandlerService**
-- Minden várolistával kapcsolatos logikát ez kezeli, hozzáadást, törlést, illetve törlés esetén a sorszámok eltolását.
-  
+**QueueHandlerService**  
+- Handles all queue-related logic, including additions, removals, and reordering queue positions when a registration is removed.
+
 ### Repository
-**RegistrationRepository**
-- Ez tartalmazza a QueueHandler által használ segédmetódus SQL query-ket, leginkább az olvashatóság kedvéért.
-  
-**UsersRepository** és **EventRepository** érintetlen, ezek segítenek az adatbázisból való lekérdezésekbe.
+**RegistrationRepository**  
+- Contains helper SQL query methods used by QueueHandler, mainly for readability.
+
+**UsersRepository** and **EventRepository** are unchanged; they assist with database queries.
 
 ### Controller
-**EventsRestController**
-- Ebben vannak a normális felhasználóknak elérhető Rest endpointok, mint az események lekérdezése, jelentkezés / lejelentkezés.
-  
-**EventsAdminController**
-- Az admin jogokkal rendlkező felhasználóknal elérhető CRUD endpointok, illetve szolgál más felhasználók le és feljelentkeztetésére egy adott eseményre is.
-  
-**RegisterController**
-- A regisztráláshoz szükséges /register endpointért felelős kontroller.
-  
+**EventsRestController**  
+- Contains REST endpoints available for normal users, such as listing events and registering/unregistering.
+
+**EventsAdminController**  
+- Contains CRUD endpoints available to admin users, and also handles registering/unregistering other users for specific events.
+
+**RegisterController**  
+- Responsible for the `/register` endpoint used for user registration.
+
 ### Auth
-- JWT token alapú autentikáció, security.yaml fileban implementált json_loginnal.
-  
-- Firewall az endpointok védéséhez, kivétel a /login és /register.
+- JWT token–based authentication, implemented via json_login in the `security.yaml` file.
+- Firewall protection for endpoints, except for `/login` and `/register`.
 
-## Teszt adatok
-- Generálás: Doctrine Fixtures és Faker, minden felhasználó jelszava `test123asd`.
-  
-- Külön létrehozott admin felhasználó tesztelésre: `admin@admin.com` , `admin123asd`.
+## Test Data
+- Generated using Doctrine Fixtures and Faker; all users have the password `test123asd`.
+- A dedicated admin user is created for testing:  
+  `admin@admin.com` / `admin123asd`.
 
-## Futtatás
-**Követelmények**
-- PHP, Composer, openssl (JWT token generálásához), Symfony CLI
-  
-**Dependency-k letöltése**
-- composer install
-  
-**JWT kulcs generálása**
+## Running the Project
+
+**Requirements**
+- PHP, Composer, openssl (for JWT key generation), Symfony CLI
+
+**Install dependencies**
+- `composer install`
+
+**Generate JWT keys**
 
 -mkdir config/jwt
 
@@ -71,15 +74,14 @@
 
 -openssl pkey -in config/jwt/private.pem -out config/jwt/public.pem -pubout
 
-- A kért passphrase a .env-ben található (természetesen csak az egyszerűség kedvéért töltöttem ezt fel, nincsen benne semmilyen privát adat)
+- The required passphrase can be found in the `.env` file (uploaded only for simplicity; it does not contain any sensitive real data).
 
-**Adatbázis**
+**Database**
 - php bin/console doctrine:database:create
   
 - php bin/console doctrine:migrations:migrate
   
 - php bin/console doctrine:fixtures:load
 
-**Szerver indítása**
-- Symfony server:start
-
+**Start Server**
+- `symfony server:start`
